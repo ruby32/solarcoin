@@ -64,6 +64,16 @@ struct Params {
     int64_t nHeight_Version2;
     int64_t DifficultyAdjustmentInterval_V1() const { return nPowTargetTimespan_Version1 / nPowTargetSpacing; }
     int64_t DifficultyAdjustmentInterval_V2() const { return 15; }
+
+    static const int LAST_POW_BLOCK;
+    static const double COIN_SUPPLY_GROWTH_RATE;
+    static const int TWO_PERCENT_INT_HEIGHT;
+    static const int TWO_PERCENT_INT;
+    static const int64_t INITIAL_COIN_SUPPLY; // Used in calculating interest rate (97.990085882B are out of circulation)
+    static const int LEGACY_VERSION_3; // V4 - Includes nTime in tx hash
+
+    /** Proof of stake parameters */
+
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
 };

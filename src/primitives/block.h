@@ -121,6 +121,36 @@ public:
     }
 
     std::string ToString() const;
+
+    /* SolarCoin PoS methods */
+    // ppcoin: entropy bit for stake modifier if chosen by modifier
+    unsigned int GetStakeEntropyBit(unsigned int nTime) const
+    {
+        // Take last bit of block hash as entropy bit
+        unsigned int nEntropyBit = ((GetHash().GetUint64(0)) & 1llu);
+        //if (fDebug && GetBoolArg("-printstakemodifier"))
+        //    printf("GetStakeEntropyBit: nTime=%u hashBlock=%s nEntropyBit=%u\n", nTime, GetHash().ToString().c_str(), nEntropyBit);
+        return nEntropyBit;
+    }
+
+    // ppcoin: two types of block: proof-of-work or proof-of-stake
+    bool IsProofOfStake() const
+    {
+        const CTransaction& tx = *vtx[1];
+        return (vtx.size() > 1 && tx.IsCoinStake());
+    }
+
+    bool IsProofOfWork() const
+    {
+        return !IsProofOfStake();
+    }
+
+    std::pair<COutPoint, unsigned int> GetProofOfStake() const
+    {
+        const CTransaction& tx = *vtx[1];
+        return IsProofOfStake() ? std::make_pair(tx.vin[0].prevout, tx.nTime) : std::make_pair(COutPoint(), (unsigned int)0);
+    }
+
 };
 
 /** Describes a place in the block chain to another node such that if the

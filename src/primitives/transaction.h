@@ -198,6 +198,18 @@ public:
         return (nValue < GetDustThreshold(minRelayTxFee));
     }
 
+    /* SolarCoin PoS functions */
+    void SetEmpty()
+    {
+        nValue = 0;
+        scriptPubKey.clear();
+    }
+
+    bool IsEmpty() const
+    {
+        return (nValue == 0 && scriptPubKey.empty());
+    }
+
     friend bool operator==(const CTxOut& a, const CTxOut& b)
     {
         return (a.nValue       == b.nValue &&
@@ -269,8 +281,12 @@ inline void UnserializeTransaction(TxType& tx, Stream& s) {
 template<typename Stream, typename TxType>
 inline void SerializeTransaction(const TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
+    const bool fSerializeTime = (!(s.GetType() & (SER_GETHASH|SER_LEGACYPROTOCOL)) || tx.nVersion > 3 || s.GetType() & SER_DISK);
 
     s << tx.nVersion;
+    if (fSerializeTime) {
+        s << tx.nTime;
+    }
     unsigned char flags = 0;
     // Consistency check
     if (fAllowWitness) {
@@ -353,6 +369,14 @@ public:
         return hash;
     }
 
+    /* SolarCoin PoS functions */
+    unsigned int nTime;
+    bool IsCoinStake() const
+    {
+        // ppcoin: the coin stake transaction is marked with the first output empty
+        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty());
+    }
+
     // Compute a hash that includes both transaction and witness data
     uint256 GetWitnessHash() const;
 
@@ -409,6 +433,9 @@ struct CMutableTransaction
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
     uint32_t nLockTime;
+    
+    /** SolarCoin PoS vars */
+    unsigned int nTime;
 
     CMutableTransaction();
     CMutableTransaction(const CTransaction& tx);

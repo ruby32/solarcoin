@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "chain.h"
+#include "consensus/params.h"
 
 /**
  * CChain implementation
@@ -206,14 +207,14 @@ double GetCurrentInflationRate(double nAverageWeight)
 }
 
 // get current interest rate by targeting for network stake dependent inflation rate PoST
-double GetCurrentInterestRate(CBlockIndex* pindexPrev)
+double GetCurrentInterestRate(CBlockIndex* pindexPrev, twoPercentIntHeight, twoPercentInt)
 {
     double interestRate = 0;
 
     // Fixed interest rate after PoW + 1000
-    if (pindexPrev->nHeight > TWO_PERCENT_INT_HEIGHT)
+    if (pindexPrev->nHeight > twoPercentIntHeight)
     {
-        interestRate = TWO_PERCENT_INT;
+        interestRate = twoPercentInt;
     }
     else
     {
@@ -231,18 +232,18 @@ double GetCurrentInterestRate(CBlockIndex* pindexPrev)
 }
 
 // Get the current coin supply / COIN
-int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev)
+int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev, twoPercentIntHeight, coinSupplyGrowthRate, initialCoinSupply, lastPowBlock)
 {
     // removed addition of 1.35 SLR / block after 835000 + 1000
-    if (pindexPrev->nHeight > TWO_PERCENT_INT_HEIGHT)
+    if (pindexPrev->nHeight > twoPercentIntHeight)
         if (pindexPrev->nHeight >= FORK_HEIGHT_2)
             // Bug fix: pindexPrev->nMoneySupply is an int64_t that has overflowed and is now negative.
-            // Use the real coin supply + expected growth rate since TWO_PERCENT_INT_HEIGHT from granting.
-            return ((pindexPrev->nMoneySupply - (98000000000 * COIN)) / COIN) + (int64_t)((double)(pindexPrev->nHeight - TWO_PERCENT_INT_HEIGHT) * COIN_SUPPLY_GROWTH_RATE);
+            // Use the real coin supply + expected growth rate since twoPercentIntHeight from granting.
+            return ((pindexPrev->nMoneySupply - (98000000000 * COIN)) / COIN) + (int64_t)((double)(pindexPrev->nHeight - twoPercentIntHeight) * coinSupplyGrowthRate);
         else
-            return INITIAL_COIN_SUPPLY;
+            return initialCoinSupply;
     else
-        return (INITIAL_COIN_SUPPLY + ((pindexPrev->nHeight - LAST_POW_BLOCK) * COIN_SUPPLY_GROWTH_RATE));
+        return (initialCoinSupply + ((pindexPrev->nHeight - lastPowBlock) * coinSupplyGrowthRate));
 }
 
 // Get the block rate for one hour
