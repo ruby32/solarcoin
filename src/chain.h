@@ -15,6 +15,11 @@
 
 #include <vector>
 
+/** 
+ * Proof of Stake function declarations 
+ */
+double GetAverageStakeWeight(CBlockIndex* pindexPrev);
+
 class CBlockFileInfo
 {
 public:

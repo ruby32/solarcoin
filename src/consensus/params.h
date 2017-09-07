@@ -73,6 +73,10 @@ struct Params {
     static const int LEGACY_VERSION_3; // V4 - Includes nTime in tx hash
 
     /** Proof of stake parameters */
+    uint256 posLimit; // SolarCoin: proof-of-stake limit
+    unsigned int nPoSStakeMinAge = 8 * 60 * 60; // SolarCoin: 8 hours proof-of-stake min age
+    unsigned int nPoSModifierInterval = 10 * 50; // SolarCoin: 10 minute time interval modifier 
+    constexpr static const double PI = 3.1415926535;
 
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;

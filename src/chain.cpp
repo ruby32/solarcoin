@@ -5,6 +5,7 @@
 
 #include "chain.h"
 #include "consensus/params.h"
+#include "kernel.h"
 
 /**
  * CChain implementation
@@ -152,17 +153,18 @@ int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& fr
 
 // SOLARCOIN
 // get stake time factored weight for reward and hash PoST
-int64_t GetStakeTimeFactoredWeight(int64_t timeWeight, int64_t bnCoinDayWeight, CBlockIndex* pindexPrev)
+int64_t GetStakeTimeFactoredWeight(int64_t timeWeight, int64_t bnCoinDayWeight, CBlockIndex* pindexPrev, const Consensus::Params&params)
 {
+
     int64_t factoredTimeWeight;
     double weightFraction = (bnCoinDayWeight+1) / (GetAverageStakeWeight(pindexPrev));
     if (weightFraction > 0.45)
     {
-        factoredTimeWeight = nStakeMinAge+1;
+        factoredTimeWeight = params.nPoSStakeMinAge+1;
     }
     else
     {
-        double stakeTimeFactor = pow(cos((PI*weightFraction)),2.0);
+        double stakeTimeFactor = pow(cos((params.PI*weightFraction)),2.0);
         factoredTimeWeight = stakeTimeFactor*timeWeight;
     }
     return factoredTimeWeight;
