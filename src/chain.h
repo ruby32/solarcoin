@@ -11,14 +11,9 @@
 #include "pow.h"
 #include "tinyformat.h"
 #include "uint256.h"
-#include "util.h"
+#include "utilmoneystr.h"
 
 #include <vector>
-
-/** 
- * Proof of Stake function declarations 
- */
-double GetAverageStakeWeight(CBlockIndex* pindexPrev);
 
 class CBlockFileInfo
 {

@@ -234,6 +234,5 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
 }
 
 std::string CopyrightHolders(const std::string& strPrefix);
-std::string FormatMoney(int64_t n, bool fPlus=false);
 
 #endif // BITCOIN_UTIL_H

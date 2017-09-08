@@ -20,6 +20,7 @@
 #include "sync.h"
 #include "uint256.h"
 #include "threadinterrupt.h"
+#include "kernel.h"
 
 #include <atomic>
 #include <deque>

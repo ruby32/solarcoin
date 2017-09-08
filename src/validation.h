@@ -17,6 +17,7 @@
 #include "script/script_error.h"
 #include "sync.h"
 #include "versionbits.h"
+#include "util.h"
 
 #include <algorithm>
 #include <exception>
@@ -575,5 +576,10 @@ void DumpMempool();
 
 /** Load the mempool from disk. */
 bool LoadMempool();
+
+/** 
+ * Proof of Stake function declarations 
+ */
+double GetAverageStakeWeight(CBlockIndex* pindexPrev);
 
 #endif // BITCOIN_VALIDATION_H
