@@ -581,5 +581,5 @@ bool LoadMempool();
  * Proof of Stake function declarations 
  */
 double GetAverageStakeWeight(CBlockIndex* pindexPrev);
-
+int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev, int twoPercentIntHeight, int coinSupplyGrowthRate, int initialCoinSupply, int lastPowBlock);
 #endif // BITCOIN_VALIDATION_H

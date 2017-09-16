@@ -35,6 +35,7 @@
 #include "validationinterface.h"
 #include "versionbits.h"
 #include "warnings.h"
+#include "pos.h"
 
 #include <atomic>
 #include <sstream>
@@ -76,6 +77,8 @@ uint64_t nPruneTarget = 0;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 int nBestHeight = -1;
+int nAverageStakeWeightHeightCached = 0;
+double dAverageStakeWeightCached = 0;
 
 uint256 hashAssumeValid;
 
@@ -4394,7 +4397,7 @@ double GetCurrentInflationRate(double nAverageWeight)
 }
 
 // get current interest rate by targeting for network stake dependent inflation rate PoST
-double GetCurrentInterestRate(CBlockIndex* pindexPrev, twoPercentIntHeight, twoPercentInt)
+double GetCurrentInterestRate(CBlockIndex* pindexPrev, int twoPercentIntHeight, int twoPercentInt)
 {
     double interestRate = 0;
 
@@ -4419,7 +4422,7 @@ double GetCurrentInterestRate(CBlockIndex* pindexPrev, twoPercentIntHeight, twoP
 }
 
 // Get the current coin supply / COIN
-int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev, twoPercentIntHeight, coinSupplyGrowthRate, initialCoinSupply, lastPowBlock)
+int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev, int twoPercentIntHeight, int coinSupplyGrowthRate, int initialCoinSupply, int lastPowBlock)
 {
     // removed addition of 1.35 SLR / block after 835000 + 1000
     if (pindexPrev->nHeight > twoPercentIntHeight)
