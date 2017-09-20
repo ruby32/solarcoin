@@ -5,6 +5,7 @@
 
 #include "chainparams.h"
 #include "consensus/merkle.h"
+#include "consensus/params.h"
 
 #include "tinyformat.h"
 #include "util.h"
@@ -79,7 +80,7 @@ public:
         consensus.nPowTargetSpacing = 1 * 60; // SolarCoin: 1 minute
 
         consensus.nHeight_Version2 = 208440;
-        consensus.nTargetTimespan_Version2 = DifficultyAdjustmentInterval_V2() * nTargetSpacing; // 15 minutes
+        consensus.nTargetTimespan_Version2 = consensus.DifficultyAdjustmentInterval_V2() * consensus.nPowTargetSpacing; // 15 minutes
 
         consensus.nPoSStakeMinAge = 8 * 60 * 60; // SolarCoin: 8 hours proof-of-stake min age
         consensus.nPoSModifierInterval = 10 * 50; // SolarCoin: 10 minute time interval modifier 
@@ -127,7 +128,7 @@ public:
         nDefaultPort = 18181;
         nPruneAfterHeight = 100000;
 
-static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
+// static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
         genesis = CreateGenesisBlock(1384473600, 1397766, 0x1e0ffff0, 1, 100 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0xedcf32dbfd327fe7f546d3a175d91b05e955ec1224e087961acc9a2aa8f592ee"));
@@ -154,14 +155,6 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
-
-        /* SolarCoin PoS parameters */
-        consensus.LAST_POW_BLOCK = 835213;
-        consensus.COIN_SUPPLY_GROWTH_RATE = 1.35;
-        consensus.TWO_PERCENT_INT_HEIGHT = consensus.LAST_POW_BLOCK + 1000;
-        consensus.TWO_PERCENT_INT = 2.0;
-        consensus.INITIAL_COIN_SUPPLY = 34145512; // Used in calculating interest rate (97.990085882B are out of circulation)
-        LEGACY_VERSION_3 = 3; // include nTime in tx hash
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of

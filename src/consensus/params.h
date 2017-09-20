@@ -62,15 +62,16 @@ struct Params {
     int64_t nPowTargetTimespan_Version1;
     int64_t nPowTargetTimespan_Version2;
     int64_t nHeight_Version2;
+    int64_t nTargetTimespan_Version2;
     int64_t DifficultyAdjustmentInterval_V1() const { return nPowTargetTimespan_Version1 / nPowTargetSpacing; }
     int64_t DifficultyAdjustmentInterval_V2() const { return 15; }
 
-    static const int LAST_POW_BLOCK;
-    static const double COIN_SUPPLY_GROWTH_RATE;
-    static const int TWO_PERCENT_INT_HEIGHT;
-    static const int TWO_PERCENT_INT;
-    static const int64_t INITIAL_COIN_SUPPLY; // Used in calculating interest rate (97.990085882B are out of circulation)
-    static const int LEGACY_VERSION_3; // V4 - Includes nTime in tx hash
+    static const int LAST_POW_BLOCK = 835213;
+    static const int TWO_PERCENT_INT_HEIGHT = LAST_POW_BLOCK + 1000;
+    static const int64_t INITIAL_COIN_SUPPLY = 34145512; // Used in calculating interest rate (97.990085882B are out of circulation)
+    static const int LEGACY_VERSION_3 = 3; // V4 - Includes nTime in tx hash
+    static constexpr double COIN_SUPPLY_GROWTH_RATE = 1.35;
+    static constexpr int TWO_PERCENT_INT = 2.0;
 
     /** Proof of stake parameters */
     uint256 posLimit; // SolarCoin: proof-of-stake limit

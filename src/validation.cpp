@@ -4422,18 +4422,18 @@ double GetCurrentInterestRate(CBlockIndex* pindexPrev, int twoPercentIntHeight, 
 }
 
 // Get the current coin supply / COIN
-int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev, int twoPercentIntHeight, int coinSupplyGrowthRate, int initialCoinSupply, int lastPowBlock)
+int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev)
 {
     // removed addition of 1.35 SLR / block after 835000 + 1000
-    if (pindexPrev->nHeight > twoPercentIntHeight)
+    if (pindexPrev->nHeight > consensus.TWO_PERCENT_INT_HEIGHT)
         if (pindexPrev->nHeight >= FORK_HEIGHT_2)
             // Bug fix: pindexPrev->nMoneySupply is an int64_t that has overflowed and is now negative.
             // Use the real coin supply + expected growth rate since twoPercentIntHeight from granting.
-            return ((pindexPrev->nMoneySupply - (98000000000 * COIN)) / COIN) + (int64_t)((double)(pindexPrev->nHeight - twoPercentIntHeight) * coinSupplyGrowthRate);
+            return ((pindexPrev->nMoneySupply - (98000000000 * COIN)) / COIN) + (int64_t)((double)(pindexPrev->nHeight - consensus.TWO_PERCENT_INT_HEIGHT) * consensus.COIN_SUPPLY_GROWTH_RATE);
         else
-            return initialCoinSupply;
+            return consensus.INITIAL_COIN_SUPPLY;
     else
-        return (initialCoinSupply + ((pindexPrev->nHeight - lastPowBlock) * coinSupplyGrowthRate));
+        return (consensus.INITIAL_COIN_SUPPLY + ((pindexPrev->nHeight - consensus.LAST_POW_BLOCK) * consensus.COIN_SUPPLY_GROWTH_RATE));
 }
 
 // Get the block rate for one hour
