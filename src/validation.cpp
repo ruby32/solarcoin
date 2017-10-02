@@ -4397,9 +4397,11 @@ double GetCurrentInflationRate(double nAverageWeight)
 }
 
 // get current interest rate by targeting for network stake dependent inflation rate PoST
-double GetCurrentInterestRate(CBlockIndex* pindexPrev, int twoPercentIntHeight, int twoPercentInt)
+double GetCurrentInterestRate(CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     double interestRate = 0;
+    int twoPercentIntHeight = params.TWO_PERCENT_INT_HEIGHT;
+    int twoPercentInt = params.TWO_PERCENT_INT;
 
     // Fixed interest rate after PoW + 1000
     if (pindexPrev->nHeight > twoPercentIntHeight)
@@ -4411,7 +4413,7 @@ double GetCurrentInterestRate(CBlockIndex* pindexPrev, int twoPercentIntHeight, 
         double nAverageWeight = GetAverageStakeWeight(pindexPrev);
         double inflationRate = GetCurrentInflationRate(nAverageWeight) / 100;
         // Bug fix: Should be "GetCurrentCoinSupply(pindexPrev) * COIN", but this code is no longer executed.
-        interestRate = ((inflationRate * GetCurrentCoinSupply(pindexPrev)) / nAverageWeight) * 100;
+        interestRate = ((inflationRate * GetCurrentCoinSupply(pindexPrev, params)) / nAverageWeight) * 100;
 
         // Cap interest rate (must use the 2.0.2 interest rate value)
         if (interestRate > 10.0)
@@ -4422,44 +4424,44 @@ double GetCurrentInterestRate(CBlockIndex* pindexPrev, int twoPercentIntHeight, 
 }
 
 // Get the current coin supply / COIN
-int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev)
+int64_t GetCurrentCoinSupply(CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     // removed addition of 1.35 SLR / block after 835000 + 1000
-    if (pindexPrev->nHeight > consensus.TWO_PERCENT_INT_HEIGHT)
-        if (pindexPrev->nHeight >= FORK_HEIGHT_2)
+    if (pindexPrev->nHeight > params.TWO_PERCENT_INT_HEIGHT)
+        if (pindexPrev->nHeight >= params.FORK_HEIGHT_2)
             // Bug fix: pindexPrev->nMoneySupply is an int64_t that has overflowed and is now negative.
             // Use the real coin supply + expected growth rate since twoPercentIntHeight from granting.
-            return ((pindexPrev->nMoneySupply - (98000000000 * COIN)) / COIN) + (int64_t)((double)(pindexPrev->nHeight - consensus.TWO_PERCENT_INT_HEIGHT) * consensus.COIN_SUPPLY_GROWTH_RATE);
+            return ((pindexPrev->nMoneySupply - (98000000000 * COIN)) / COIN) + (int64_t)((double)(pindexPrev->nHeight - params.TWO_PERCENT_INT_HEIGHT) * params.COIN_SUPPLY_GROWTH_RATE);
         else
-            return consensus.INITIAL_COIN_SUPPLY;
+            return params.INITIAL_COIN_SUPPLY;
     else
-        return (consensus.INITIAL_COIN_SUPPLY + ((pindexPrev->nHeight - consensus.LAST_POW_BLOCK) * consensus.COIN_SUPPLY_GROWTH_RATE));
+        return (params.INITIAL_COIN_SUPPLY + ((pindexPrev->nHeight - params.LAST_POW_BLOCK) * params.COIN_SUPPLY_GROWTH_RATE));
 }
 
 // Get the block rate for one hour
-int GetBlockRatePerHour()
+int GetBlockRatePerHour(const Consensus::Params& params)
 {
     int nRate = 0;
-    CBlockIndex* pindex = pindexBest;
+    CBlockIndex* pindex = chainActive.Tip();
     int64_t nTargetTime = GetAdjustedTime() - 3600;
 
     while (pindex && pindex->pprev && pindex->nTime > nTargetTime) {
         nRate += 1;
         pindex = pindex->pprev;
     }
-    if (nRate < nTargetSpacing / 2)
-        printf("GetBlockRatePerHour: Warning, block rate (%d) is less than half of nTargetSpacing=%d.\n", nRate, nTargetSpacing);
+    if (nRate < params.nPowTargetSpacing / 2)
+        printf("GetBlockRatePerHour: Warning, block rate (%d) is less than half of nPowTargetSpacing=%d.\n", nRate, params.nPowTargetSpacing);
     return nRate;
 }
 
 // Stakers coin reward based on coin stake time factor and targeted inflation rate PoST
-int64_t GetProofOfStakeTimeReward(int64_t nStakeTime, int64_t nFees, CBlockIndex* pindexPrev)
+int64_t GetProofOfStakeTimeReward(int64_t nStakeTime, int64_t nFees, CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
-    int64_t nInterestRate = GetCurrentInterestRate(pindexPrev)*CENT;
+    int64_t nInterestRate = GetCurrentInterestRate(pindexPrev, params)*CENT;
     int64_t nSubsidy = nStakeTime * nInterestRate * 33 / (365 * 33 + 8);
 
-    if (fDebug && GetBoolArg("-printcreation"))
-        printf("GetProofOfStakeTimeReward(): create=%s nStakeTime=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nStakeTime);
+    if (fDebug && GetBoolArg("-printcreation", false))
+        printf("GetProofOfStakeTimeReward(): create=%s nStakeTime=%u\n", FormatMoney(nSubsidy).c_str(), nStakeTime);
 
     return nSubsidy + nFees;
 }

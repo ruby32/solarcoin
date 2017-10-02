@@ -66,7 +66,12 @@ struct Params {
     int64_t DifficultyAdjustmentInterval_V1() const { return nPowTargetTimespan_Version1 / nPowTargetSpacing; }
     int64_t DifficultyAdjustmentInterval_V2() const { return 15; }
 
+    // fork params
+    static const int FORK_HEIGHT_1 = 1177000;
+    static const int FORK_HEIGHT_2 = 1440000;
     static const int LAST_POW_BLOCK = 835213;
+
+    // PoS
     static const int TWO_PERCENT_INT_HEIGHT = LAST_POW_BLOCK + 1000;
     static const int64_t INITIAL_COIN_SUPPLY = 34145512; // Used in calculating interest rate (97.990085882B are out of circulation)
     static const int LEGACY_VERSION_3 = 3; // V4 - Includes nTime in tx hash
