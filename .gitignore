@@ -11,6 +11,8 @@ src/litecoin-cli
 src/litecoin-tx
 src/test/test_litecoin
 src/test/test_litecoin_fuzzy
+src/test/test_solarcoin
+src/test/test_solarcoin_fuzzy
 src/qt/test/test_litecoin-qt
 
 # autoreconf
