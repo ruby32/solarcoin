@@ -88,6 +88,7 @@ CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 CTxMemPool mempool(::minRelayTxFee);
 
 static void CheckBlockIndex(const Consensus::Params& consensusParams);
+double GetPoSKernelPS(CBlockIndex* pindexPrev, const Consensus::Params& params);
 
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
@@ -4341,11 +4342,11 @@ public:
 
 // SOLARCOIN
 // get stake time factored weight for reward and hash PoST
-int64_t GetStakeTimeFactoredWeight(int64_t timeWeight, int64_t bnCoinDayWeight, CBlockIndex* pindexPrev, const Consensus::Params&params)
+int64_t GetStakeTimeFactoredWeight(int64_t timeWeight, int64_t bnCoinDayWeight, CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
 
     int64_t factoredTimeWeight;
-    double weightFraction = (bnCoinDayWeight+1) / (GetAverageStakeWeight(pindexPrev));
+    double weightFraction = (bnCoinDayWeight+1) / (GetAverageStakeWeight(pindexPrev, params));
     if (weightFraction > 0.45)
     {
         factoredTimeWeight = params.nPoSStakeMinAge+1;
@@ -4359,7 +4360,7 @@ int64_t GetStakeTimeFactoredWeight(int64_t timeWeight, int64_t bnCoinDayWeight, 
 }
 
 // get average stake weight of last 60 blocks PoST
-double GetAverageStakeWeight(CBlockIndex* pindexPrev)
+double GetAverageStakeWeight(CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     double weightSum = 0.0, weightAve = 0.0;
     if (nBestHeight < 1)
@@ -4376,7 +4377,7 @@ double GetAverageStakeWeight(CBlockIndex* pindexPrev)
     CBlockIndex* currentBlockIndex = pindexPrev;
     for (i = 0; currentBlockIndex && i < 60; i++)
     {
-        double tempWeight = GetPoSKernelPS(currentBlockIndex);
+        double tempWeight = GetPoSKernelPS(currentBlockIndex, params);
         weightSum += tempWeight;
         currentBlockIndex = currentBlockIndex->pprev;
     }
@@ -4410,7 +4411,7 @@ double GetCurrentInterestRate(CBlockIndex* pindexPrev, const Consensus::Params& 
     }
     else
     {
-        double nAverageWeight = GetAverageStakeWeight(pindexPrev);
+        double nAverageWeight = GetAverageStakeWeight(pindexPrev, params);
         double inflationRate = GetCurrentInflationRate(nAverageWeight) / 100;
         // Bug fix: Should be "GetCurrentCoinSupply(pindexPrev) * COIN", but this code is no longer executed.
         interestRate = ((inflationRate * GetCurrentCoinSupply(pindexPrev, params)) / nAverageWeight) * 100;
@@ -4467,4 +4468,30 @@ int64_t GetProofOfStakeTimeReward(int64_t nStakeTime, int64_t nFees, CBlockIndex
 }
 
 
+
+double GetPoSKernelPS(CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
+    int nPoSInterval = 72;
+    double dStakeKernelsTriedAvg = 0;
+    int nStakesHandled = 0, nStakesTime = 0;
+
+    CBlockIndex* pindexPrevStake = NULL;
+
+    while (pindexPrev && nStakesHandled < nPoSInterval)
+    {
+        if (pindexPrev->IsProofOfStake())
+        {
+            dStakeKernelsTriedAvg += GetDifficulty(pindexPrev) * 4294967296.0;
+            if (pindexPrev->nHeight >= params.FORK_HEIGHT_2)
+                nStakesTime += std::max((int)(pindexPrevStake ? (pindexPrevStake->nTime - pindexPrev->nTime) : 0), 0); // Bug fix: Prevent negative stake weight
+            else
+                nStakesTime += pindexPrevStake ? (pindexPrevStake->nTime - pindexPrev->nTime) : 0;
+            pindexPrevStake = pindexPrev;
+            nStakesHandled++;
+        }
+        pindexPrev = pindexPrev->pprev;
+    }
+
+   return nStakesTime ? dStakeKernelsTriedAvg / nStakesTime : 0;
+}
 

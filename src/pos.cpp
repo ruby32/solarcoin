@@ -5,32 +5,35 @@
 
 #include "chain.h"
 #include "main.h"
-#include "pos.h"
 #include "primitives/block.h"
 
-double GetPoSKernelPS(CBlockIndex* pindexPrev)
+double GetDifficulty(const CBlockIndex* blockindex)
 {
-    int nPoSInterval = 72;
-    double dStakeKernelsTriedAvg = 0;
-    int nStakesHandled = 0, nStakesTime = 0;
+  // Floating point number that is a multiple of the minimum difficulty,
+  // minimum difficulty = 1.0.
+  if (blockindex == NULL)
+  {
+      if (pindexBestHeader == NULL)
+          return 1.0;
+      else
+          blockindex = GetLastBlockIndex(pindexBestHeader, false);
+  }
 
-    CBlockIndex* pindexPrevStake = NULL;
+  int nShift = (blockindex->nBits >> 24) & 0xff;
 
-    while (pindexPrev && nStakesHandled < nPoSInterval)
-    {
-        if (pindexPrev->IsProofOfStake())
-        {
-            dStakeKernelsTriedAvg += GetDifficulty(pindexPrev) * 4294967296.0;
-            if (pindexPrev->nHeight >= FORK_HEIGHT_2)
-                nStakesTime += max((int)(pindexPrevStake ? (pindexPrevStake->nTime - pindexPrev->nTime) : 0), 0); // Bug fix: Prevent negative stake weight
-            else
-                nStakesTime += pindexPrevStake ? (pindexPrevStake->nTime - pindexPrev->nTime) : 0;
-            pindexPrevStake = pindexPrev;
-            nStakesHandled++;
-        }
-        pindexPrev = pindexPrev->pprev;
-    }
+  double dDiff =
+      (double)0x0000ffff / (double)(blockindex->nBits & 0x00ffffff);
 
-   return nStakesTime ? dStakeKernelsTriedAvg / nStakesTime : 0;
+  while (nShift < 29)
+  {
+      dDiff *= 256.0;
+      nShift++;
+  }
+  while (nShift > 29)
+  {
+      dDiff /= 256.0;
+      nShift--;
+  }
+
+  return dDiff;
 }
-

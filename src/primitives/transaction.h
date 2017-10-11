@@ -432,6 +432,7 @@ struct CMutableTransaction
     int32_t nVersion;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
+    std::string strTxComment;
     uint32_t nLockTime;
     
     /** SolarCoin PoS vars */

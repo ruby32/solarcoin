@@ -61,6 +61,10 @@ struct Params {
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan_Version1;
     int64_t nPowTargetTimespan_Version2;
+    
+    int64_t nInterval_Version1;
+    int64_t nInterval_Version2;
+
     int64_t nHeight_Version2;
     int64_t nTargetTimespan_Version2;
     int64_t DifficultyAdjustmentInterval_V1() const { return nPowTargetTimespan_Version1 / nPowTargetSpacing; }
