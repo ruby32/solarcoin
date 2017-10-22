@@ -130,7 +130,7 @@ public:
 
 // static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
         //genesis = CreateGenesisBlock(1384473600, 1397766, 0x1e0ffff0, 1, 100 * COIN);
-        genesis = CreateGenesisBlock(1384473600, 1397766, 0x1e0ffff0, 2, 100 * COIN);
+        genesis = CreateGenesisBlock(1384473600, 1397766, 0x1e0ffff0, 1, 100 * COIN);
 
         consensus.hashGenesisBlock = genesis.GetHash();
         printf("consensus.hashGenesisBlock: %s \n", genesis.GetHash().ToString());
@@ -251,7 +251,7 @@ public:
         nPruneAfterHeight = 1000;
 
         printf("asdfklajsfklafd\n");
-        genesis = CreateGenesisBlock(1486949366, 293345, 0x1e0ffff0, 2, 100 * COIN);
+        genesis = CreateGenesisBlock(1486949366, 293345, 0x1e0ffff0, 1, 100 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
 
         printf("hashGenesisBlock: %08x \n", consensus.hashGenesisBlock);
@@ -337,7 +337,7 @@ public:
         nDefaultPort = 19444;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1296688602, 0, 0x207fffff, 2, 100 * COIN);
+        genesis = CreateGenesisBlock(1296688602, 0, 0x207fffff, 1, 100 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x530827f38f93b43ed12af0b3ad25a288dc02ed74d6d7857862df51fc56c416f9"));
         assert(genesis.hashMerkleRoot == uint256S("0x97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9"));
