@@ -130,7 +130,7 @@ public:
 
 // static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
         //genesis = CreateGenesisBlock(1384473600, 1397766, 0x1e0ffff0, 1, 100 * COIN);
-        genesis = CreateGenesisBlock(1384473600, 1397766, 0x1e0ffff0, 2, 100 * COIN);
+        genesis = CreateGenesisBlock(1384473600, 1397766, 0x1e0ffff0, 1, 100 * COIN);
 
         consensus.hashGenesisBlock = genesis.GetHash();
         printf("consensus.hashGenesisBlock: %s \n", genesis.GetHash().ToString());
