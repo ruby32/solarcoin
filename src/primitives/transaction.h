@@ -276,6 +276,7 @@ inline void UnserializeTransaction(TxType& tx, Stream& s) {
         throw std::ios_base::failure("Unknown transaction optional data");
     }
     s >> tx.nLockTime;
+    s >> tx.strTxComment;
 }
 
 template<typename Stream, typename TxType>
@@ -309,6 +310,7 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
         }
     }
     s << tx.nLockTime;
+    s << tx.strTxComment;
 }
 
 
@@ -336,6 +338,7 @@ public:
     const std::vector<CTxIn> vin;
     const std::vector<CTxOut> vout;
     const uint32_t nLockTime;
+    const std::string strTxComment;
 
 private:
     /** Memory only. */
