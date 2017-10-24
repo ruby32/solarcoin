@@ -15,6 +15,10 @@ static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 
 static const int WITNESS_SCALE_FACTOR = 4;
 
+// Legacy transaction versions.
+static const int32_t LEGACY_VERSION_2=2;
+static const int32_t LEGACY_VERSION_3=3;
+
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
 class COutPoint
 {
@@ -229,12 +233,15 @@ struct CMutableTransaction;
 /**
  * Basic transaction serialization format:
  * - int32_t nVersion
+ * - uint32_t nTime
  * - std::vector<CTxIn> vin
  * - std::vector<CTxOut> vout
  * - uint32_t nLockTime
+ * - std::string strTxComment
  *
  * Extended transaction serialization format:
  * - int32_t nVersion
+ * - uint32_t nTime
  * - unsigned char dummy = 0x00
  * - unsigned char flags (!= 0)
  * - std::vector<CTxIn> vin
@@ -242,12 +249,18 @@ struct CMutableTransaction;
  * - if (flags & 1):
  *   - CTxWitness wit;
  * - uint32_t nLockTime
+ * - std::string strTxComment
  */
 template<typename Stream, typename TxType>
 inline void UnserializeTransaction(TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
+    const bool fSerializeTime = (!(s.GetType() & (SER_GETHASH|SER_LEGACYPROTOCOL)) || tx.nVersion > LEGACY_VERSION_3 || s.GetType() & SER_DISK);
 
     s >> tx.nVersion;
+    if (fSerializeTime) {
+        s >> tx.nTime;
+    }
+
     unsigned char flags = 0;
     tx.vin.clear();
     tx.vout.clear();
@@ -282,7 +295,7 @@ inline void UnserializeTransaction(TxType& tx, Stream& s) {
 template<typename Stream, typename TxType>
 inline void SerializeTransaction(const TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
-    const bool fSerializeTime = (!(s.GetType() & (SER_GETHASH|SER_LEGACYPROTOCOL)) || tx.nVersion > 3 || s.GetType() & SER_DISK);
+    const bool fSerializeTime = (!(s.GetType() & (SER_GETHASH|SER_LEGACYPROTOCOL)) || tx.nVersion > LEGACY_VERSION_3 || s.GetType() & SER_DISK);
 
     s << tx.nVersion;
     if (fSerializeTime) {
@@ -321,13 +334,13 @@ class CTransaction
 {
 public:
     // Default transaction version.
-    static const int32_t CURRENT_VERSION=2;
+    static const int32_t CURRENT_VERSION=4; // V4 - Includes nTime in tx hash
 
     // Changing the default transaction version requires a two step process: first
     // adapting relay policy by bumping MAX_STANDARD_VERSION, and then later date
     // bumping the default CURRENT_VERSION at which point both CURRENT_VERSION and
     // MAX_STANDARD_VERSION will be equal.
-    static const int32_t MAX_STANDARD_VERSION=2;
+    static const int32_t MAX_STANDARD_VERSION=4;
 
     // The local variables are made const to prevent unintended modification
     // without updating the cached hash value. However, CTransaction is not
@@ -335,6 +348,7 @@ public:
     // and bypass the constness. This is safe, as they update the entire
     // structure, including the hash.
     const int32_t nVersion;
+    const uint32_t nTime;
     const std::vector<CTxIn> vin;
     const std::vector<CTxOut> vout;
     const uint32_t nLockTime;
@@ -373,7 +387,7 @@ public:
     }
 
     /* SolarCoin PoS functions */
-    unsigned int nTime;
+    //unsigned int nTime;
     bool IsCoinStake() const
     {
         // ppcoin: the coin stake transaction is marked with the first output empty
@@ -433,13 +447,14 @@ public:
 struct CMutableTransaction
 {
     int32_t nVersion;
+    uint32_t nTime;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
-    std::string strTxComment;
     uint32_t nLockTime;
+    std::string strTxComment;
     
     /** SolarCoin PoS vars */
-    unsigned int nTime;
+    //unsigned int nTime;
 
     CMutableTransaction();
     CMutableTransaction(const CTransaction& tx);
